@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limbo Item Logger</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background: #000000 url('https://files.catbox.moe/ltdyjo.png') no-repeat center center fixed !important;
+            background-size: cover !important;
+            color: #ffffff;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.88);
+            z-index: -1;
+        }
+
+        header {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: #ffffff;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #ffffff;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        header p {
+            font-size: 1rem;
+            color: #aaaaaa;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(10, 10, 10, 0.95);
+            border: 1px solid #ffffff;
+            border-radius: 4px;
+            padding: 25px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .status-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #111111;
+            border: 1px solid #333333;
+            padding: 12px 18px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .indicator {
+            height: 10px;
+            width: 10px;
+            background-color: #ffffff;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 6px #ffffff;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+
+        .logs-title {
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #333333;
+            padding-bottom: 6px;
+            color: #cccccc;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #log-stream {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 450px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .log-card {
+            background: #151515;
+            border: 1px solid #333333;
+            border-left: 3px solid #ffffff;
+            border-radius: 4px;
+            padding: 15px;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #888888;
+            margin-bottom: 8px;
+        }
+
+        .log-content {
+            font-size: 0.95srem;
+            margin-bottom: 12px;
+            color: #dddddd;
+        }
+
+        .join-btn {
+            display: inline-block;
+            background: #ffffff;
+            color: #000000;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .join-btn:hover {
+            background: #cccccc;
+        }
+
+        .test-panel {
+            margin-top: 20px;
+            padding: 15px;
+            background: #111111;
+            border: 1px solid #333333;
+            border-radius: 4px;
+        }
+
+        .test-panel h3 {
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            color: #aaaaaa;
+        }
+
+        .test-btn {
+            background: transparent;
+            border: 1px solid #ffffff;
+            color: #ffffff;
+            padding: 6px 12px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .test-btn:hover {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #444444;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+
+    <header>
+        <h1>Limbo Item Logger</h1>
+        <p>Live Webhook Tracking & Direct Server Joiner</p>
+    </header>
+
+    <div class="container">
+        <div class="status-box">
+            <span>Status: <strong id="connection-status" style="color: #ffffff;">LISTENING</strong></span>
+            <span class="indicator"></span>
+        </div>
+
+        <div class="logs-title">Active Server Logs</div>
+        <div id="log-stream">
+            <div class="log-card" style="text-align: center; color: #666666; border-left: 3px solid #666;">
+                Awaiting incoming webhook logs...
+            </div>
+        </div>
+
+        <div class="test-panel">
+            <h3>Simulator (Click to test log entries)</h3>
+            <div>
+                <button class="test-btn" onclick="simulateWebhook('baxnoshotLP', '1537183848360710265', 'General Webhook')">Test baxnoshotLP</button>
+                <button class="test-btn" onclick="simulateWebhook('tlq_h', '1537183725362880553', 'Darklight Orbs')">Test tlq_h</button>
+                <button class="test-btn" onclick="simulateWebhook('Sols_Sniper', '1537183598292107304', 'Shards')">Test Sols_Sniper</button>
+                <button class="test-btn" onclick="simulateWebhook('tiq_h', '1537183848360710265', 'General Webhook')">Test tiq_h</button>
+                <button class="test-btn" onclick="simulateWebhook('Antislushmatic', '1537183725362880553', 'Darklight Orbs')">Test Antislushmatic</button>
+                <button class="test-btn" onclick="simulateWebhook('tlq_h2', '1537183598292107304', 'Shards')">Test tlq_h2</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Whitelisted user links mapping
+        const userLinks = {
+            "baxnoshotLP": "https://www.roblox.com/share?code=56ab14ff4220464cbf9cebd238bc3abf&type=Server",
+            "tlq_h": "https://www.roblox.com/share?code=45fafb999f26fe4089f5637ffcb7150a&type=Server",
+            "Sols_Sniper": "https://www.roblox.com/share?code=0a4b556a0db2e242ad165134ec788d46&type=Server",
+            "tiq_h": "https://www.roblox.com/share?code=bcc7f2d222bdbb46a66c2cc428a6de8e&type=Server",
+            "Antislushmatic": "https://www.roblox.com/share?code=a4115410017a9f4a802ae7eecc8dd792&type=Server",
+            "tlq_h2": "https://www.roblox.com/share?code=96f445932bb02847b4c7abdd73858857&type=Server"
+        };
+
+        // Allowed Role IDs configuration
+        const ALLOWED_ROLES = {
+            "1537183848360710265": "General Webhook",
+            "1537183725362880553": "Darklight Orbs",
+            "1537183598292107304": "Shards"
+        };
+
+        // Convert web link to direct skip-launch protocol link
+        function getDirectJoinLink(webLink) {
+            try {
+                const urlObj = new URL(webLink);
+                const code = urlObj.searchParams.get("code");
+                const type = urlObj.searchParams.get("type") || "Server";
+                if (code) {
+                    return `roblox://navigation/share_links?code=${code}&type=${type}`;
+                }
+            } catch(e) {
+                console.error("Link parsing error:", e);
+            }
+            return webLink;
+        }
+
+        function appendLog(username, roleCategory, webLink) {
+            const stream = document.getElementById("log-stream");
+            
+            if (stream.children.length === 1 && stream.children[0].style.textAlign === "center") {
+                stream.innerHTML = "";
+            }
+
+            const directLink = getDirectJoinLink(webLink);
+            const card = document.createElement("div");
+            card.className = "log-card";
+            
+            const timestamp = new Date().toLocaleTimeString();
+            
+            card.innerHTML = `
+                <div class="log-header">
+                    <span>[${timestamp}] Category: <strong>${roleCategory}</strong></span>
+                    <span>User: <strong>${username}</strong></span>
+                </div>
+                <div class="log-content">
+                    Target private server detected for user <b>${username}</b>. Click below to launch directly.
+                </div>
+                <a href="${directLink}" class="join-btn" target="_blank">🚀 Join Private Server</a>
+            `;
+
+            stream.prepend(card);
+        }
+
+        // Simulation function to test manually
+        function simulateWebhook(username, roleId, categoryName) {
+            if (userLinks[username] && ALLOWED_ROLES[roleId]) {
+                appendLog(username, categoryName, userLinks[username]);
+            }
+        }
+    </script>
+</body>
+</html>
